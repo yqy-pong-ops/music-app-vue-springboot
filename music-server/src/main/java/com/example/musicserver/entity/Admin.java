@@ -1,22 +1,11 @@
-package com.example.musicserver.domain;
+package com.example.musicserver.entity;
 
 import java.io.Serializable;
 
-/**
- * 管理员
- */
 public class Admin implements Serializable {
-    private Integer id;
     private String name;
+    private Integer id;
     private String pwd;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -24,6 +13,14 @@ public class Admin implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getPwd() {

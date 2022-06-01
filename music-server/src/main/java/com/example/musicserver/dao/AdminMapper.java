@@ -1,8 +1,9 @@
 package com.example.musicserver.dao;
 
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-@Repository
+@Mapper
 public interface AdminMapper {
-
+    public int verifyPwd(@Param("name") String name, @Param("pwd") String pwd);
 }

@@ -12,8 +12,8 @@
                 :inline="false"
                 size="normal"
             >
-                <el-form-item label="用户名" prop="username">
-                    <el-input v-model="loginForm.username"></el-input>
+                <el-form-item label="用户名" prop="name">
+                    <el-input v-model="loginForm.name"></el-input>
                 </el-form-item>
 
                 <el-form-item label="密码" prop="pwd">
@@ -36,11 +36,11 @@ export default {
         return {
             labelPosition: "left",
             loginForm: {
-                username: "",
+                name: "",
                 pwd: "",
             },
             rules: {
-                username: [
+                name: [
                     {
                         required: true,
                         message: "请输入用户名",
