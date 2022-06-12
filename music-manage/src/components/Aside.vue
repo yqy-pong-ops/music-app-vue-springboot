@@ -12,7 +12,7 @@
         >
             <el-menu-item v-for="(item, index) in menuItems" :key="index" :index="item.index">
                 <i :class="item.icon"></i>
-                {{item.title}}
+                <span class="title">{{item.title}}</span>
             </el-menu-item>
         </el-menu>
     </div>
@@ -86,6 +86,11 @@ export default {
 .sidebar-menu {
     height: 100%;
 }
+
+.sidebar-menu.el-menu--collapse .el-menu-item .title {
+    display: none;
+}
+
 .sidebar-menu:not(.el-menu--collapse) {
     width: 150px;
 }

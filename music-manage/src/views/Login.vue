@@ -85,7 +85,10 @@ export default {
                                 name,
                                 id,
                             });
-                            this.$router.push({ name: "Info" });
+                            // 跳转页面
+                            let next = this.$route.query.next;
+                            if (next) this.$router.replace(next);
+                            else this.$router.push({ name: "Info" });
                         })
                         .catch((err) => {
                             console.log(err);
