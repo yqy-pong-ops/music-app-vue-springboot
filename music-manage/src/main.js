@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import App from './App.vue'
+// 引入router
 import router from './router';
+// 引入store
+import store from './store';
 // 引入element-ui
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
@@ -10,15 +13,16 @@ import VCharts from 'v-charts'
 import './assets/css/main.css'
 import 'babel-polyfill'
 // 引入自定义axios
-import axios from './http';
+import global from './global';
 
 Vue.use(ElementUI);
 Vue.use(VCharts);
 
 Vue.config.productionTip = false;
-Vue.prototype.$axios = axios;
+// 注入全局变量
+Vue.prototype.$GLOBAL = global;
 
-Vue.prototype.$jumpTo = function (ruoterName) {
+Vue.prototype.jumpTo = function (ruoterName) {
   this.$router.push({
     name: ruoterName,
   })
@@ -26,5 +30,10 @@ Vue.prototype.$jumpTo = function (ruoterName) {
 
 new Vue({
   router,
+  store,
   render: h => h(App),
+  // 安装全局事件总线
+  beforeCreate() {
+    Vue.prototype.$bus = this;
+  },
 }).$mount('#app')

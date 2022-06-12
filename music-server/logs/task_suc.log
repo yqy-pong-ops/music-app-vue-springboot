@@ -1,0 +1,4 @@
+2022-06-12 10:26:02,630|DEBUG|task_suc|42|task_suc debug
+2022-06-12 10:26:02,638|INFO|task_suc|43|task_suc info
+2022-06-12 10:26:02,639|WARN|task_suc|44|task_suc warn
+2022-06-12 10:26:02,640|ERROR|task_suc|45|task_suc error

@@ -17,12 +17,13 @@
                 </el-form-item>
 
                 <el-form-item label="密码" prop="pwd">
-                    <el-input v-model="loginForm.pwd"></el-input>
+                    <el-input v-model="loginForm.pwd" type="password"></el-input>
                 </el-form-item>
 
                 <el-form-item>
                     <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
-                    <el-button @click="$jumpTo('SignUp')">注册</el-button>
+                    <el-button @click="jumpTo('SignUp')">注册</el-button>
+                    <!-- <el-button @click="codeTest">注册</el-button> -->
                 </el-form-item>
             </el-form>
         </div>
@@ -30,6 +31,9 @@
 </template>
 
 <script>
+import jwt_decode from "jwt-decode";
+import { getLoginStatus } from "@/api";
+
 export default {
     name: "Login",
     data() {
@@ -49,7 +53,12 @@ export default {
                 ],
                 pwd: [
                     { required: true, message: "请输入密码", trigger: "blur" },
-                    { min: 6, max: 20, message: "密码长度必须在6-20之间", trigger: "blur" },
+                    {
+                        min: 6,
+                        max: 20,
+                        message: "密码长度必须在6-20之间",
+                        trigger: "blur",
+                    },
                 ],
             },
         };
@@ -58,9 +67,29 @@ export default {
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    // 发送表单数据
+                    getLoginStatus(this.loginForm)
+                        .then((data) => {
+                            const token = data[this.$GLOBAL.TOKEN];
+                            localStorage.setItem(
+                                this.$GLOBAL.adminToken,
+                                token
+                            );
+                            const name = data[this.$GLOBAL.DATA].name;
+                            localStorage.setItem(this.$GLOBAL.adminName, name);
 
-                    // 向后台发送数据
-                    console.log(this.loginForm);
+                            const id = jwt_decode(token).id;
+
+                            // 写入vuex
+                            this.$store.commit("setAdmin", {
+                                name,
+                                id,
+                            });
+                            this.$router.push({ name: "Info" });
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
                 } else {
                     console.log("form error");
                     return false;
@@ -92,9 +121,9 @@ export default {
 .form-wrapper {
     margin: 0 auto;
     margin-top: 30px;
-    padding: 20px 20px 10px 20px;
+    padding: 20px 25px 10px 20px;
     background-color: #fff;
     border-radius: 5px;
-    width: 350px;
+    width: 330px;
 }
 </style>

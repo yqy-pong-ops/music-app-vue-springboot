@@ -1,0 +1,4 @@
+2022-06-08 11:40:25,333|DEBUG|task_fail|31|task_fail debug
+2022-06-08 11:40:25,334|INFO|task_fail|32|task_fail info
+2022-06-08 11:40:25,334|WARN|task_fail|33|task_fail warn
+2022-06-08 11:40:25,335|ERROR|task_fail|34|task_fail error
