@@ -1,7 +1,7 @@
 /*
  * @Author: Axiuxiu
  * @Date: 2022-06-12 10:07:01
- * @LastEditTime: 2022-06-12 14:07:29
+ * @LastEditTime: 2022-06-13 21:23:05
  * @Description: 全局异常处理器
  * @Todo: 
  */
@@ -18,7 +18,17 @@ import com.example.musicserver.utils.RespFormat;
 
 @ControllerAdvice
 public class MyExceptionHandler {
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseBody
+    public Map<String, Object> argExcHandler(IllegalArgumentException e){
+        Map<String, Object> resp = new HashMap<>();
+        resp.put(RespFormat.CODE, RespFormat.MIS_CODE);
+        resp.put(RespFormat.MSG, e.getMessage());
+        return resp;
+    }
+
     @ExceptionHandler(Exception.class)
+
     @ResponseBody
     public Map<String, Object> excHandler(Exception e) {
         Map<String, Object> resp = new HashMap<>();

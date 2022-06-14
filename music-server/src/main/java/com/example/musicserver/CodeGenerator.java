@@ -23,7 +23,7 @@ public class CodeGenerator {
     private static final String DB_NAME = "music_db"; // 数据库名
     private static final String PROJ_NAME = "com.example.musicserver";
 
-    private static Scanner scanner = new Scanner(System.in);
+    private static Scanner scanner = null;
 
     public static String scanner(String tip) {
 
@@ -44,6 +44,7 @@ public class CodeGenerator {
     public static void main(String[] args) {
         // 代码生成器
         AutoGenerator mpg = new AutoGenerator();
+        scanner = new Scanner(System.in);
 
         // 全局配置
         GlobalConfig gc = new GlobalConfig();
@@ -126,5 +127,7 @@ public class CodeGenerator {
         mpg.setStrategy(strategy);
         mpg.setTemplateEngine(new FreemarkerTemplateEngine());
         mpg.execute();
+
+        scanner.close();
     }
 }
