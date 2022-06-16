@@ -22,6 +22,8 @@ import com.example.musicserver.manage.entity.Singer;
 import com.example.musicserver.manage.service.ISingerService;
 import com.example.musicserver.utils.RespFormat;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * <p>
  * 前端控制器
@@ -32,13 +34,19 @@ import com.example.musicserver.utils.RespFormat;
  */
 @RestController
 @RequestMapping("/manage/singer")
+@Slf4j
 public class SingerController {
     private static final String SINGER_PIC_DIR = System.getProperty("user.dir") + File.separator
-            + "upload" + File.separator + "singer-pics" + File.separator;
+            + "upload" + File.separator + "singer-pics";
     private static final String SINGER_PIC_PATH = "/upload/singer-pics";
+    private static final String DEFAULT_PIC_URL = "/upload/singer-pics/茅原实里.jpg";
 
     @Autowired
     private ISingerService singerService;
+
+    static void addDefault(Singer singer) {
+        singer.setPic(DEFAULT_PIC_URL);
+    }
 
     @PostMapping("/test")
     public Singer test(@RequestBody Singer singer) {
@@ -62,9 +70,10 @@ public class SingerController {
             resp.put(RespFormat.MSG, "添加失败");
             return resp;
         }
-
         resp.put(RespFormat.CODE, RespFormat.OK_CODE);
         resp.put(RespFormat.MSG, "添加成功");
+        addDefault(singer);
+        resp.put(RespFormat.DATA, singer);
         return resp;
     }
 
@@ -88,6 +97,7 @@ public class SingerController {
 
         resp.put(RespFormat.CODE, RespFormat.OK_CODE);
         resp.put(RespFormat.MSG, "更新成功");
+        resp.put(RespFormat.DATA, singer);
         return resp;
     }
 
@@ -201,11 +211,15 @@ public class SingerController {
         sPic.transferTo(dest);
         // 更新数据库
         String sPicUrl = SINGER_PIC_PATH + "/" + filename;
-        Singer s = new Singer();
-        s.setId(id);
+        Singer s = singerService.getById(id);
+        String oldPicUrl = s.getPic();
         s.setPic(sPicUrl);
         // 可能出现数据库异常
         singerService.updateById(s);
+        // 删除原有图片
+        File oldPic = new File(System.getProperty("user.dir"), oldPicUrl);
+        if (oldPicUrl != DEFAULT_PIC_URL && !oldPic.delete())
+            log.error("failed to delete the original file");
 
         resp.put(RespFormat.CODE, RespFormat.OK_CODE);
         resp.put(RespFormat.DATA, sPicUrl);
