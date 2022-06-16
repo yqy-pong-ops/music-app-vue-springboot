@@ -1,5 +1,7 @@
 package com.example.musicserver.manage.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.musicserver.excts.LocalNoDirExct;
+import com.example.musicserver.excts.UserNoArgExct;
 import com.example.musicserver.manage.entity.Singer;
 import com.example.musicserver.manage.service.ISingerService;
 import com.example.musicserver.utils.RespFormat;
@@ -27,6 +33,9 @@ import com.example.musicserver.utils.RespFormat;
 @RestController
 @RequestMapping("/manage/singer")
 public class SingerController {
+    private static final String SINGER_PIC_DIR = System.getProperty("user.dir") + File.separator
+            + "upload" + File.separator + "singer-pics" + File.separator;
+    private static final String SINGER_PIC_PATH = "/upload/singer-pics";
 
     @Autowired
     private ISingerService singerService;
@@ -36,26 +45,49 @@ public class SingerController {
         return singer;
     }
 
-    @PostMapping("/addOrUpdate")
+    @PostMapping("/addSinger")
     /**
-     * 添加或修改: 传id修改，不传id添加
+     * 添加singer
      * 
      * @param singer
      * @return
      */
-    public Map<String, Object> addOrUpdate(@RequestBody Singer singer) {
+    public Map<String, Object> addSinger(@RequestBody Singer singer) {
         Map<String, Object> resp = new HashMap<>();
 
-        boolean flag = singer.getId() == null;
+        singer.setId(null);
 
         if (!singerService.saveOrUpdate(singer)) {
             resp.put(RespFormat.CODE, RespFormat.ERR_CODE);
-            resp.put(RespFormat.MSG, flag ? "添加失败" : "更新失败");
+            resp.put(RespFormat.MSG, "添加失败");
             return resp;
         }
 
         resp.put(RespFormat.CODE, RespFormat.OK_CODE);
-        resp.put(RespFormat.MSG, flag ? "添加成功" : "更新成功");
+        resp.put(RespFormat.MSG, "添加成功");
+        return resp;
+    }
+
+    @PostMapping("/updateSinger")
+    /**
+     * 添加singer
+     * 
+     * @param singer
+     * @return
+     */
+    public Map<String, Object> updateSinger(@RequestBody Singer singer) throws UserNoArgExct {
+        Map<String, Object> resp = new HashMap<>();
+
+        if (singer.getId() == null)
+            throw new UserNoArgExct("缺少必填参数id");
+        if (!singerService.saveOrUpdate(singer)) {
+            resp.put(RespFormat.CODE, RespFormat.ERR_CODE);
+            resp.put(RespFormat.MSG, "更新失败");
+            return resp;
+        }
+
+        resp.put(RespFormat.CODE, RespFormat.OK_CODE);
+        resp.put(RespFormat.MSG, "更新成功");
         return resp;
     }
 
@@ -141,16 +173,43 @@ public class SingerController {
     }
 
     @PostMapping("/getByGender")
-    public Map<String, Object> getByGender(@RequestBody Map<String, Object> data) {
+    public Map<String, Object> getByGender(@RequestBody Map<String, Object> data) throws UserNoArgExct {
         Map<String, Object> resp = new HashMap<>();
 
-        Boolean gender = (Boolean) data.get("gender");
+        Integer gender = (Integer) data.get("gender");
         if (gender == null)
-            throw new IllegalArgumentException("未传入gender字段");
-            
+            throw new UserNoArgExct("未传入gender字段");
+
         List<Singer> singers = singerService.list(new QueryWrapper<Singer>().eq("gender", gender));
         resp.put(RespFormat.CODE, RespFormat.OK_CODE);
         resp.put(RespFormat.DATA, singers);
         return resp;
     }
+
+    @PostMapping("/updateSingerPic")
+    public Map<String, Object> updateSingerPic(@RequestParam("file") MultipartFile sPic,
+            @RequestParam("id") Integer id) throws UserNoArgExct, LocalNoDirExct, IllegalStateException, IOException {
+        Map<String, Object> resp = new HashMap<>();
+        if (sPic.isEmpty())
+            throw new UserNoArgExct("上传文件为空");
+        File dir = new File(SINGER_PIC_DIR);
+        if (!dir.exists() && dir.mkdir())
+            throw new LocalNoDirExct("未创建upload文件夹");
+        String filename = sPic.getOriginalFilename() + System.currentTimeMillis();
+        File dest = new File(dir, filename);
+        // 这里可能会抛出IOException
+        sPic.transferTo(dest);
+        // 更新数据库
+        String sPicUrl = SINGER_PIC_PATH + "/" + filename;
+        Singer s = new Singer();
+        s.setId(id);
+        s.setPic(sPicUrl);
+        // 可能出现数据库异常
+        singerService.updateById(s);
+
+        resp.put(RespFormat.CODE, RespFormat.OK_CODE);
+        resp.put(RespFormat.DATA, sPicUrl);
+        return resp;
+    }
+
 }

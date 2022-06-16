@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import { Message } from 'element-ui';
-import global from './global';
+import { ADMINTOKEN } from './global';
 
 Vue.use(VueRouter);
 
@@ -15,7 +15,7 @@ const router = new VueRouter({
         },
         {
             path: '/home',
-            name: 'Home',
+            // name: 'Home',
             component: () => import('./views/Home.vue'),
             children: [
                 {
@@ -78,7 +78,7 @@ router.beforeEach((to, from, next) => {
     // console.log('go into route guard');
     if (res != -1)
         return next();
-    const token = localStorage.getItem(global.adminToken);
+    const token = localStorage.getItem(ADMINTOKEN);
     if (token != null)
         return next()
     Message.error('您尚未登录');

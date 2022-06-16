@@ -33,6 +33,7 @@
 <script>
 import jwt_decode from "jwt-decode";
 import { getLoginStatus } from "@/api";
+import { ADMINNAME, ADMINTOKEN, DATA, TOKEN } from '@/global';
 
 export default {
     name: "Login",
@@ -70,13 +71,13 @@ export default {
                     // 发送表单数据
                     getLoginStatus(this.loginForm)
                         .then((data) => {
-                            const token = data[this.$GLOBAL.TOKEN];
+                            const token = data[TOKEN];
                             localStorage.setItem(
-                                this.$GLOBAL.adminToken,
+                                ADMINTOKEN,
                                 token
                             );
-                            const name = data[this.$GLOBAL.DATA].name;
-                            localStorage.setItem(this.$GLOBAL.adminName, name);
+                            const name = data[DATA].name;
+                            localStorage.setItem(ADMINNAME, name);
 
                             const id = jwt_decode(token).id;
 

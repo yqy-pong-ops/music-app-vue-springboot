@@ -1,15 +1,15 @@
 /*
  * @Author: Axiuxiu
  * @Date: 2022-06-11 16:52:10
- * @LastEditTime: 2022-06-12 10:48:13
+ * @LastEditTime: 2022-06-16 11:00:00
  * @Description: 封装axios
  * @Todo: 
  */
+import { ADMINTOKEN } from '@/global';
 import axios from 'axios';
 import { Message, Loading } from 'element-ui';
 import _ from 'lodash';
 import router from '../router';
-import global from '../global';
 
 var loadInst = null;
 var loadCnt = 0;
@@ -42,7 +42,7 @@ axios.interceptors.request.use(config => {
     // Do something before request is sent
     openLoading();
 
-    const token = localStorage.getItem(global.adminToken);
+    const token = localStorage.getItem(ADMINTOKEN);
     // 带上验证头
     if (token != null)
         config.headers = {
@@ -61,7 +61,8 @@ axios.interceptors.response.use(response => {
     // 判断自定义状态码
     const data = response.data;
     if (data.code != 200) {
-        Message.error(data.msg);
+        if (data.code != 500)
+            Message.error(data.msg);
         throw new Error(response);
     }
     // 显示提示信息

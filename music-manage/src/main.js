@@ -13,20 +13,19 @@ import VCharts from 'v-charts'
 import './assets/css/main.css'
 import 'babel-polyfill'
 // 引入自定义axios
-import global from './global';
+import { getGenderStr } from '@/utils';
 
 Vue.use(ElementUI);
 Vue.use(VCharts);
 
 Vue.config.productionTip = false;
-// 注入全局变量
-Vue.prototype.$GLOBAL = global;
 
 Vue.prototype.jumpTo = function (ruoterName) {
   this.$router.push({
     name: ruoterName,
   })
 }
+Vue.prototype.getGenderStr = getGenderStr;
 
 new Vue({
   router,

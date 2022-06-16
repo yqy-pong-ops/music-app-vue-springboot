@@ -29,7 +29,7 @@ public class Singer implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    private Boolean gender;
+    private Integer gender;
 
     private String name;
 

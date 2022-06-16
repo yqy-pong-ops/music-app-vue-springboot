@@ -7,6 +7,7 @@ const store = new Vuex.Store({
     state: {
         // admin基本信息
         admin: null,
+        // HOST: '127.0.0.1:8080',
     },
     mutations: {
         // 设置admin对象，

@@ -18,10 +18,9 @@ public interface IAdminService extends IService<Admin> {
      * 
      * @param adminVO
      * @return
-     * @throws IllegalArgumentException
      * @throws Exception
      */
-    public Admin verifyPwd(AdminVO adminVO) throws IllegalArgumentException, Exception;
+    public Admin verifyPwd(AdminVO adminVO) throws Exception;
 
     /**
      * 添加管理员：转换失败抛出异常，重名返回0
