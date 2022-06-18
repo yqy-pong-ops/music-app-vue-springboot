@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.musicserver.excts.LocalNoDirExct;
 import com.example.musicserver.excts.UserNoArgExct;
 import com.example.musicserver.manage.entity.Song;
@@ -23,6 +24,8 @@ import com.example.musicserver.manage.service.ISongService;
 import com.example.musicserver.manage.vo.RespVO;
 import com.example.musicserver.manage.vo.SongVO;
 import com.example.musicserver.utils.RespFormat;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -34,6 +37,7 @@ import com.example.musicserver.utils.RespFormat;
  */
 @RestController
 @RequestMapping("/manage/song")
+@Slf4j
 public class SongController {
     // mp3文件的本地目录
     private static final String SONG_DIR = System.getProperty("user.dir") + File.separator
@@ -46,7 +50,7 @@ public class SongController {
     // 歌曲图片上传父路径
     private static final String SONG_PIC_PATH = "/upload/song-pics";
     // 默认歌曲图标位置
-    private static final String SONG_ICON_URL = "/upload/song-icon.jpg";
+    private static final String DEFAULT_SONG_PIC_URL = "/upload/song-icon.jpg";
 
     @Autowired
     private ISongService songService;
@@ -64,7 +68,7 @@ public class SongController {
      * @param lyrics
      * @param introduction
      * @param mp3
-     * @return
+     * @return 返回新增表项
      * @throws UserNoArgExct
      * @throws LocalNoDirExct
      * @throws IllegalStateException
@@ -77,7 +81,7 @@ public class SongController {
                 || mp3.isEmpty())
             throw new UserNoArgExct("addSong: 传入参数不足！");
 
-        String pic = SONG_ICON_URL;
+        String pic = DEFAULT_SONG_PIC_URL;
         // mp3文件存入本地
         File dir = new File(SONG_DIR);
         if (!dir.exists() && !dir.mkdir())
@@ -94,7 +98,7 @@ public class SongController {
         if (!songService.saveOrUpdate(song))
             return new RespVO(RespFormat.ERR_CODE, "数据库更新失败", null);
 
-        return new RespVO(RespFormat.OK_CODE, "添加成功", null);
+        return new RespVO(RespFormat.OK_CODE, "添加成功", new SongVO(song));
     }
 
     @GetMapping("/getSongsBySingerId")
@@ -109,6 +113,13 @@ public class SongController {
     }
 
     @PostMapping("/updateSongById")
+    /**
+     * TODO: 更新歌曲本地文件
+     * 
+     * @param song
+     * @return
+     * @throws UserNoArgExct
+     */
     public RespVO updateSongById(@RequestBody Song song) throws UserNoArgExct {
         if (song.getId() == null)
             throw new UserNoArgExct("缺少id字段");
@@ -130,7 +141,7 @@ public class SongController {
      * @param pic
      * @return
      */
-    public RespVO updatePic(Integer id, MultipartFile pic)
+    public RespVO updatePic(Integer id, @RequestParam("file") MultipartFile pic)
             throws UserNoArgExct, LocalNoDirExct, IllegalStateException, IOException {
         if (id == null)
             throw new UserNoArgExct("缺少id参数");
@@ -143,14 +154,26 @@ public class SongController {
         String filename = System.currentTimeMillis() + pic.getOriginalFilename();
         File dest = new File(dir, filename);
         pic.transferTo(dest);
-        // 返回新的picUrl
         String picUrl = SONG_PIC_PATH + "/" + filename;
+        // 删除原有图片
+        Song song = songService.getById(id);
+        String oldUrl = song.getPic();
+        if (oldUrl != DEFAULT_SONG_PIC_URL) {
+            File oldPic = new File(System.getProperty("user.dir"), oldUrl);
+            if(!oldPic.delete()) log.error("删除原有图片失败");
+        }
+
+        // 更新数据库
+        if (!songService.update(new UpdateWrapper<Song>().eq("id", id).set("pic", picUrl)))
+            return new RespVO(RespFormat.ERR_CODE, "数据库更新失败", null);
+
         return new RespVO(RespFormat.OK_CODE, "图片更新成功", picUrl);
     }
 
     @PostMapping("/deleteSongById")
     /**
      * 删除歌曲
+     * TODO: 删除歌曲本地文件
      * 
      * @param id
      * @return
@@ -167,6 +190,7 @@ public class SongController {
     @PostMapping("/deleteBatchByIds")
     /**
      * 批量删除歌曲
+     * TODO: 批量删除歌曲本地文件
      * 
      * @param idList
      * @return

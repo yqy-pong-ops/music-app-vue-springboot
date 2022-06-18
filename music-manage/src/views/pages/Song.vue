@@ -1,7 +1,7 @@
 <!--
  * @Author: Axiuxiu
  * @Date: 2022-06-08 21:15:01
- * @LastEditTime: 2022-06-18 17:00:35
+ * @LastEditTime: 2022-06-18 22:59:13
  * @Description: 
  * @Todo: 实现分页+搜索功能
 -->
@@ -227,6 +227,11 @@ export default {
                         addSong(form)
                             .then((data) => {
                                 console.log(data);
+                                // 更新表格
+                                const newItem = data[DATA];
+                                this.allData.push(newItem);
+                                this.handleQuery();
+                                this.diaClose();
                             })
                             .catch((err) => {
                                 console.log(err);
@@ -272,7 +277,7 @@ export default {
 
         // 头像上传
         getUploadUrl(id) {
-            return "/manage/singer/updateSingerPic" + "?id=" + id;
+            return "/manage/song/updatePic" + "?id=" + id;
         },
 
         // 分页+查找

@@ -234,7 +234,7 @@ public class SingerController {
         // 删除原有图片
         File oldPic = new File(System.getProperty("user.dir"), oldPicUrl);
         if (oldPicUrl != DEFAULT_PIC_URL && !oldPic.delete())
-            log.error("failed to delete the original file");
+            log.error("删除原有图片失败");
 
         resp.put(RespFormat.CODE, RespFormat.OK_CODE);
         resp.put(RespFormat.DATA, sPicUrl);

@@ -1,7 +1,7 @@
 /*
  * @Author: Axiuxiu
  * @Date: 2022-06-17 09:36:14
- * @LastEditTime: 2022-06-18 16:04:04
+ * @LastEditTime: 2022-06-18 22:43:54
  * @Description: mixins文件
  * @Todo: 
  */
@@ -69,9 +69,10 @@ export const DataTableMixin = {
                     message: "头像更新成功",
                 });
             } else {
+                console.log(res);
                 this.$message({
                     showClose: true,
-                    type: "success",
+                    type: "error",
                     message: "头像更新失败",
                 });
             }
