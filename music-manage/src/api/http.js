@@ -1,7 +1,7 @@
 /*
  * @Author: Axiuxiu
  * @Date: 2022-06-11 16:52:10
- * @LastEditTime: 2022-06-16 11:00:00
+ * @LastEditTime: 2022-06-18 10:20:47
  * @Description: 封装axios
  * @Todo: 
  */
@@ -92,9 +92,9 @@ axios.interceptors.response.use(response => {
     return Promise.reject(error);
 });
 
-export function get(url, params) {
+export function get(url, params, config) {
     return new Promise((resolve, reject) => {
-        axios.get(url, { params })
+        axios.get(url, { params }, config)
             .then(res => {
                 resolve(res.data);
             })
@@ -104,9 +104,9 @@ export function get(url, params) {
     })
 }
 
-export function post(url, data) {
+export function post(url, data, config) {
     return new Promise((resolve, reject) => {
-        axios.post(url, data)
+        axios.post(url, data, config)
             .then(res => {
                 resolve(res.data);
             })

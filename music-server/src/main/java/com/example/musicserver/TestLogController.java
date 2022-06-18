@@ -1,7 +1,7 @@
 /*
  * @Author: Axiuxiu
  * @Date: 2022-06-08 11:30:38
- * @LastEditTime: 2022-06-11 15:50:08
+ * @LastEditTime: 2022-06-18 09:37:08
  * @Description: 各种测试路由
  * @Todo: 
  */
@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.musicserver.manage.vo.RespVO;
 import com.example.musicserver.utils.RespFormat;
 
 @RestController
@@ -78,11 +80,8 @@ public class TestLogController {
         return resp;
     }
 
-    @GetMapping("/fileTest")
-    public String fileTest() {
-        if (createFile("test.txt"))
-            return "文件创建成功";
-        else
-            return "文件创建失败";
+    @PostMapping("/test")
+    public RespVO test(Integer id, @RequestParam("name") String aName) {
+        return new RespVO(200, "请求成功", aName + id);
     }
 }

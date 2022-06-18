@@ -4,7 +4,7 @@
             class="sidebar-menu"
             mode="vertical"
             :collapse="collapse"
-            :default-active="onRoutes"
+            :default-active="onRoute"
             @select="handleSelect"
             background-color="#334256"
             text-color="#fff"
@@ -23,7 +23,6 @@ export default {
     name: "Aside",
     data() {
         return {
-            onRoutes: this.$route.name,
             collapse: false,
             menuItems: [
                 {
@@ -43,11 +42,6 @@ export default {
                 },
                 {
                     icon: "el-icon-document",
-                    title: "歌曲管理",
-                    index: "Song",
-                },
-                {
-                    icon: "el-icon-document",
                     title: "歌单管理",
                     index: "Sheet",
                 },
@@ -57,6 +51,11 @@ export default {
     methods: {
         handleSelect(index) {
             this.jumpTo(index);
+        },
+    },
+    computed: {
+        onRoute() {
+            return this.$route.name;
         },
     },
     mounted() {

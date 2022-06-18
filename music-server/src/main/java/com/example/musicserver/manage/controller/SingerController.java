@@ -121,6 +121,21 @@ public class SingerController {
         return resp;
     }
 
+    @PostMapping("/deleteBatchById")
+    public Map<String, Object> deleteBatchById(@RequestBody List<Integer> idList) throws UserNoArgExct {
+        Map<String, Object> resp = new HashMap<>();
+        if (idList == null || idList.size() == 0)
+            throw new UserNoArgExct("传入id列表为空");
+        if (singerService.removeByIds(idList)) {
+            resp.put(RespFormat.CODE, RespFormat.OK_CODE);
+            resp.put(RespFormat.MSG, "批量删除成功");
+        } else {
+            resp.put(RespFormat.CODE, RespFormat.ERR_CODE);
+            resp.put(RespFormat.MSG, "批量删除失败");
+        }
+        return resp;
+    }
+
     @GetMapping("/getAll")
     /**
      * 查询所有歌手

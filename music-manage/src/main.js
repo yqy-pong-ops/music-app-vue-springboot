@@ -13,7 +13,6 @@ import VCharts from 'v-charts'
 import './assets/css/main.css'
 import 'babel-polyfill'
 // 引入自定义axios
-import { getGenderStr } from '@/utils';
 
 Vue.use(ElementUI);
 Vue.use(VCharts);
@@ -25,7 +24,6 @@ Vue.prototype.jumpTo = function (ruoterName) {
     name: ruoterName,
   })
 }
-Vue.prototype.getGenderStr = getGenderStr;
 
 new Vue({
   router,

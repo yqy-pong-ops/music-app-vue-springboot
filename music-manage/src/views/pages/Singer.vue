@@ -1,7 +1,7 @@
 <!--
  * @Author: Axiuxiu
  * @Date: 2022-06-08 21:15:01
- * @LastEditTime: 2022-06-16 16:48:01
+ * @LastEditTime: 2022-06-18 16:03:52
  * @Description: 
  * @Todo: 实现分页+搜索功能
 -->
@@ -11,6 +11,7 @@
             <!-- 歌手名筛选输入框 -->
             <el-input
                 v-model="input"
+                prefix-icon="el-icon-search"
                 placeholder="根据歌手名筛选"
                 size="mini"
                 clearable
@@ -18,10 +19,19 @@
             ></el-input>
 
             <el-button type="primary" size="mini" @click="handleAdd">添加歌手</el-button>
+            <el-button type="danger" size="mini" @click="delBatch">批量删除</el-button>
         </div>
 
         <!-- 显示的数据表格 -->
-        <el-table :data="tableData" border size="mini" style="width: 100%" height="420px">
+        <el-table
+            :data="tableData"
+            ref="table"
+            border
+            size="mini"
+            style="width: 100%"
+            height="420px"
+            @selection-change="handleSelect"
+        >
             <el-table-column type="selection" width="40"></el-table-column>
 
             <el-table-column label="歌手图片" width="110" align="center">
@@ -29,7 +39,7 @@
                     <img :src="scope.row.pic" alt class="singer-pic" />
                     <el-upload
                         :action="getUploadUrl(scope.row.id)"
-                        :before-upload="beforeUpload"
+                        :before-upload="(file)=>beforeUpload(file, ['image/png','image/jpeg', 'image/webp'], 10)"
                         :on-success="(resp) => handleUploadSuccess(resp, scope.row.id)"
                         :show-file-list="false"
                     >
@@ -38,17 +48,27 @@
                 </template>
             </el-table-column>
             <el-table-column label="歌手" prop="name" width="120" align="center"></el-table-column>
-            <el-table-column label="性别" width="100" align="center">
+            <el-table-column label="性别" width="60" align="center">
                 <template v-slot="scope">{{getGenderStr(scope.row.gender)}}</template>
             </el-table-column>
             <el-table-column label="生日" prop="birth" width="120" align="center"></el-table-column>
             <el-table-column label="地区" prop="location" width="100" align="center"></el-table-column>
-            <el-table-column label="简介">
+            <el-table-column label="简介" align="center">
                 <template v-slot="scope">
                     <p class="intro">{{scope.row.introduction}}</p>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" width="200">
+            <el-table-column label="歌曲管理" align="center" width="80">
+                <template v-slot="scope">
+                    <el-button
+                        type="text"
+                        size="mini"
+                        @click="songEdit(scope.row.id, scope.row.name)"
+                    >歌曲管理</el-button>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="操作" align="center" width="160">
                 <template v-slot="scope">
                     <el-button type="primary" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
                     <el-button type="danger" size="mini" @click="handleDel(scope.row.id)">删除</el-button>
@@ -89,7 +109,7 @@
                     </el-radio-group>
                 </el-form-item>
 
-                <el-form-item label="生日" size="mini">
+                <el-form-item label="生日" size="mini" prop="birth">
                     <el-date-picker
                         v-model="dForm.birth"
                         type="date"
@@ -123,12 +143,20 @@
 </template>
 
 <script>
-import { getAllSinger, addSinger, updateSinger, deleteSinger } from "@/api";
-import { CODE, DATA } from "@/global";
+import {
+    getAllSinger,
+    addSinger,
+    updateSinger,
+    deleteSinger,
+    delBatchSingers,
+} from "@/api";
+import { DATA } from "@/global";
+import { DataTableMixin } from "@/mixins/index";
 const dayjs = require("dayjs");
 
 export default {
     name: "Singer",
+    mixins: [DataTableMixin],
     data() {
         return {
             // 弹出框
@@ -150,6 +178,13 @@ export default {
                     {
                         required: true,
                         message: "请输入歌手名",
+                        trigger: "blur",
+                    },
+                ],
+                birth: [
+                    {
+                        required: true,
+                        message: "请填写生日",
                         trigger: "blur",
                     },
                 ],
@@ -188,6 +223,9 @@ export default {
                 pagerCnt: 5,
                 pageSize: 5,
             },
+
+            // 多选
+            multiSelect: [],
         };
     },
     methods: {
@@ -276,52 +314,6 @@ export default {
         getUploadUrl(id) {
             return "/manage/singer/updateSingerPic" + "?id=" + id;
         },
-        // 上传图片之前的校验
-        beforeUpload(file) {
-            const isPhoto =
-                file.type == "image/jpeg" || file.type == "image/png";
-            if (!isPhoto) {
-                this.$message({
-                    showClose: true,
-                    type: "error",
-                    message: "上传头像格式只能是jpg或png格式",
-                });
-                return false;
-            }
-            const isLt5M = file.size / 1024 / 1024 < 5;
-            if (!isLt5M) {
-                this.$message({
-                    showClose: true,
-                    type: "error",
-                    message: "上传头像图片不得超过5M",
-                });
-                return false;
-            }
-            return true;
-        },
-        handleUploadSuccess(res, id) {
-            if (res[CODE] == 200) {
-                // 更新表格
-                let pic = res[DATA];
-                this.allData.forEach((item) => {
-                    if (item.id !== id) return;
-                    item.pic = pic;
-                });
-                this.handleQuery();
-
-                this.$message({
-                    showClose: true,
-                    type: "success",
-                    message: "头像更新成功",
-                });
-            } else {
-                this.$message({
-                    showClose: true,
-                    type: "success",
-                    message: "头像更新失败",
-                });
-            }
-        },
 
         // 分页+查找
         setTable(page) {
@@ -344,7 +336,7 @@ export default {
                     total === 0
                         ? 1
                         : Math.floor((total - 1) / this.pagin.pageSize) + 1;
-            console.log(this.pagin.curPage);
+            // console.log(this.pagin.curPage);
             this.setTable(this.pagin.curPage);
         },
 
@@ -356,26 +348,79 @@ export default {
             this.dialog.vis = true;
             this.dialog.opt = 1;
         },
+        delRow(id) {
+            /**
+             * 删除并更新表格
+             */
+            deleteSinger({ id })
+                .then(() => {
+                    // 更新表格
+                    this.allData = this.allData.filter((item) => {
+                        return item.id !== id;
+                    });
+                    this.handleQuery();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        },
         handleDel(id) {
             // 发送
             // console.log(row);
             this.$confirm("确认删除？")
                 .then(() => {
-                    deleteSinger({ id })
-                        .then(() => {
-                            // 更新表格
-                            this.allData = this.allData.filter((item) => {
-                                return item.id !== id;
-                            });
-                            this.handleQuery();
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                        });
+                    this.delRow(id);
                 })
                 .catch((err) => {
                     console.log(err);
                 });
+        },
+
+        // 多行选取和删除操作
+        handleSelect(selection) {
+            this.multiSelect = selection;
+        },
+        delBatch() {
+            delBatchSingers(this.multiSelect.map((item) => item.id))
+                .then(() => {
+                    // 更新表格和属性
+                    console.log(this.multiSelect);
+                    console.log(this.allData);
+                    this.allData = this.allData.filter((item) => {
+                        for (let j of this.multiSelect) {
+                            if (item.id !== j.id) continue;
+                            return false;
+                        }
+                        return true;
+                    });
+                    console.log(this.allData);
+
+                    this.handleQuery();
+                    this.$refs["table"].clearSelection();
+                })
+                .catch((err) => {
+                    console.log(err.data);
+                });
+        },
+        handleDelBatch() {
+            this.$confirm("确认删除所选项吗？")
+                .then(() => {
+                    this.delBatch();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        },
+
+        // 跳转操作
+        songEdit(id, name) {
+            this.$router.push({
+                name: "Song",
+                query: {
+                    id,
+                    name,
+                },
+            });
         },
     },
     mounted() {
